@@ -1,0 +1,24 @@
+[Unit]
+Description=MUJ Pulse polling and notification worker
+After=network-online.target muj-pulse-api.service
+Wants=network-online.target
+
+[Service]
+User=pulse
+Group=pulse
+WorkingDirectory=/opt/muj-pulse/backend
+EnvironmentFile=/opt/muj-pulse/backend/.env
+Environment=PYTHONUNBUFFERED=1
+UMask=0077
+ExecStart=/opt/muj-pulse/.venv/bin/python -m app.worker
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/muj-pulse/backend/data
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target

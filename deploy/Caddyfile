@@ -1,0 +1,13 @@
+# Replace with your backend hostname. DNS must point to the VPS.
+api.example.com {
+    encode gzip
+    request_body {
+        max_size 20KB
+    }
+    reverse_proxy 127.0.0.1:8000
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        -Server
+    }
+}
