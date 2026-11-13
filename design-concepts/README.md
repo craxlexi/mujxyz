@@ -14,3 +14,9 @@ This is a static design study. Course names, marks and sync time on the app scre
 - App: phone-first Home, Results, Activity, You; quick view of semester, last SLCM check, course marks, and official SGPA state.
 
 The generated building cutout is a draft derived from the supplied MUJ photo. Refine edges and verify building details before production use. Keep the oversized art on marketing surfaces; functional result pages should prioritize data.
+
+## Scroll turn study
+
+Open `scroll-prototype.html` and scroll. The front and side cutouts are staged in a sticky hero while the copy changes. This is a two-image perspective/crossfade test, not a true 3D rotation. The middle of the transition shows duplicate architecture because the supplied views have different geometry and camera positions.
+
+For a convincing continuous turn, model the recognizable building in Blender from reference views, then render a short orbit as optimized WebP/AVIF frames. A scroll-linked canvas can scrub those frames while the text and background remain ordinary HTML/CSS. This is likely more predictable on Android than shipping an interactive WebGL scene. Include a static view for reduced-motion users and slower devices.
