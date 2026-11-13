@@ -52,7 +52,7 @@ def deliver_once():
         rows = conn.execute('SELECT d.id,s.id AS sub_id,s.payload FROM deliveries d JOIN subscriptions s ON s.id=d.subscription_id WHERE d.delivered IS NULL AND d.attempts<5 AND d.next_attempt<=? LIMIT 10', (now,)).fetchall()
     for row in rows:
         try:
-            webpush(subscription_info=json.loads(row['payload']), data=json.dumps({'title': 'Your academic results changed', 'body': 'Open MUJ Pulse to see updated marks, grades or SGPA.', 'url': '/'}), vapid_private_key=config.VAPID_PRIVATE, vapid_claims={'sub': config.VAPID_SUBJECT}, timeout=15)
+            webpush(subscription_info=json.loads(row['payload']), data=json.dumps({'title': 'Your academic results changed', 'body': 'Open MUJhe ky to see updated marks, grades or SGPA.', 'url': '/app'}), vapid_private_key=config.VAPID_PRIVATE, vapid_claims={'sub': config.VAPID_SUBJECT}, timeout=15)
             with db() as conn:
                 conn.execute('UPDATE deliveries SET delivered=?,error=NULL WHERE id=?', (time.time(), row['id']))
         except WebPushException as exc:

@@ -1,0 +1,97 @@
+@font-face{font-family:Manrope;src:url('/fonts/Manrope.ttf') format('truetype');font-weight:200 800;font-style:normal;font-display:swap}
+@font-face{font-family:'DM Sans';src:url('/fonts/DMSans.ttf') format('truetype');font-weight:100 1000;font-style:normal;font-display:swap}
+/* The public composition stays independent of the academic workspace. */
+.landing-hero{min-height:840px;height:calc(100svh - 104px)}
+.landing-copy{padding-top:115px;max-width:500px}
+.landing-copy h1{font-size:72px;letter-spacing:-.075em}
+.landing-hero-side{width:min(79vw,1220px);right:-10vw;bottom:-2%;}
+.landing-wordmark{position:absolute;z-index:3;bottom:66px;left:5vw;font:700 clamp(85px,14vw,225px)/.88 Space,sans-serif;letter-spacing:-.09em;color:var(--m-ink);white-space:nowrap;pointer-events:none}
+.landing-wordmark span{color:var(--m-accent)}
+.landing-hero .landing-chapter{bottom:37px}
+.landing-nav a,.landing-actions a{transition:background .18s,color .18s,transform .18s}
+.landing-actions .landing-cta:hover{transform:translateY(-2px)}
+.landing-copy{animation:appear .45s ease-out both}
+.landing-wordmark{animation:appear .6s ease-out both}
+@media(max-width:1100px){.landing-copy{padding-top:70px}.landing-copy h1{font-size:65px}.landing-hero-side{width:1000px;right:-280px}.landing-wordmark{font-size:17vw}}
+@media(max-width:700px){.landing-hero{height:auto;min-height:820px}.landing-copy{padding-top:38px;max-width:none}.landing-copy h1{font-size:58px}.landing-copy p{font-size:15px;max-width:345px}.landing-actions{gap:19px}.landing-wordmark{bottom:67px;left:20px;font-size:18vw}.landing-hero-side{width:680px;right:-185px;bottom:80px}.landing-hero .landing-chapter{bottom:26px;font-size:8px}.landing-signin{gap:7px}.landing-nav{padding-inline:20px}.landing-brand{font-size:24px}}
+/* Local fonts and explicit fallbacks prevent the serif fallback seen in the old preview. */
+.workspace-view,.auth-view{font-family:'DM Sans',Arial,sans-serif;--w-panel:#111214;--w-line:#26272a;--w-subtle:#a6a7ad}
+.workspace-view.theme-light{--w-panel:#eee9e1;--w-line:#b6aea3;--w-subtle:#59534c}
+.workspace-view h1,.workspace-view h2,.workspace-view h3,.workspace-view .home-metrics strong,.workspace-view .workspace-brand,.signin-screen h1{font-family:Manrope,Arial,sans-serif!important;letter-spacing:-.035em!important}
+.workspace-view h1{font-weight:700!important}
+.workspace-view button,.workspace-view input,.workspace-view select,.workspace-view .workspace-health,.workspace-view .course-row,.workspace-view .course-marks,.workspace-view .marks-course dd,.workspace-view .mobile-bottom-nav button{font-family:'DM Sans',Arial,sans-serif}
+.workspace-view p{line-height:1.6}
+.workspace-view .workspace-brand{font-size:24px;letter-spacing:-.06em!important;padding:0 10px 38px}
+.workspace-nav button,.workspace-site-link{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:500;min-height:46px}
+.workspace-site-link{padding:0 13px;color:var(--w-subtle);margin-top:23px;border-top:1px solid var(--w-line);padding-top:14px;min-height:60px}
+.workspace-site-link:hover{color:var(--m-ink)}
+.workspace-nav button svg{flex-shrink:0;stroke-width:1.7}
+.workspace-toolbar{height:78px;border-bottom:1px solid var(--w-line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(24px,3vw,44px)}
+.workspace-toolbar>div{display:flex;gap:14px;font-size:14px;align-items:center}
+.workspace-toolbar span{color:var(--w-subtle)}
+.workspace-toolbar strong{font-weight:500}
+.workspace-view .content{padding-top:30px}
+.workspace-view .home-hero{height:278px;border-radius:16px;background:#101113;border:1px solid var(--w-line)}
+.workspace-view .home-hero-copy{padding:31px 34px;max-width:560px}
+.workspace-view .home-hero h1{font-size:48px;line-height:1.12;letter-spacing:-.045em!important;margin:15px 0 12px}
+.workspace-view .home-hero p{font-size:15px;max-width:355px;color:#b1b2b8}
+.workspace-view .home-hero>img{width:580px;right:-90px;bottom:-12px;opacity:.65;filter:brightness(.7)}
+.workspace-view .home-hero:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#101113 36%,transparent 80%);z-index:1}
+.workspace-view .home-sync{left:34px;bottom:25px;font-size:12px;font-weight:500}
+.workspace-view .home-eyebrow{font:500 12px 'DM Sans',Arial,sans-serif;letter-spacing:.06em;color:#b8b9bf}
+.workspace-view .home-glance{padding:18px 0 0;border-bottom:0}
+.workspace-view .home-glance-title{display:none}
+.workspace-view .home-metrics{margin:0;gap:16px}
+.workspace-view .home-metrics>div{border:1px solid var(--w-line);border-radius:12px;padding:20px 23px;background:var(--w-panel)}
+.workspace-view .home-metrics strong{font-size:30px;font-variant-numeric:tabular-nums}
+.workspace-view .home-metrics span{font-size:13px;margin-top:7px;color:var(--w-subtle)}
+.workspace-view .home-main{gap:20px;grid-template-columns:minmax(0,1.5fr) minmax(285px,1fr);padding-top:25px}
+.workspace-view .home-courses,.workspace-view .home-activity{padding:23px;border:1px solid var(--w-line);border-radius:14px;background:var(--w-panel);min-width:0}
+.workspace-view .home-section-title{margin-bottom:13px;gap:8px}
+.workspace-view .home-section-title>div>span{display:none}
+.workspace-view .home-section-title h2{font-size:22px;margin:0;letter-spacing:-.04em!important}
+.workspace-view .home-section-title button{font-size:12px;white-space:nowrap}
+.workspace-view .course-row{position:relative;padding:19px 0;display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,.85fr);gap:5px 16px;align-items:center;transform:none!important}
+.workspace-view .course-row-top{font:500 11px 'DM Sans',Arial,sans-serif;letter-spacing:0;grid-column:1;color:var(--w-subtle)}
+.workspace-view .course-row-top small{font-size:11px;letter-spacing:0}
+.workspace-view .course-row-top svg{display:none}
+.workspace-view .course-row>strong{font:600 15px/1.4 'DM Sans',Arial,sans-serif;margin:0;grid-column:1;letter-spacing:0}
+.workspace-view .course-marks{grid-column:2;grid-row:1/3;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.workspace-view .course-marks>span{display:flex;flex-direction:column;gap:6px;padding:8px 3px;font-size:10px;border:1px solid var(--w-line);border-radius:7px;min-width:0}
+.workspace-view .course-marks b{font:600 14px 'DM Sans',Arial,sans-serif;font-variant-numeric:tabular-nums}
+.workspace-view .course-marks b small{font-size:11px;font-weight:400;color:var(--w-subtle)}
+.workspace-view .home-events>div{padding:19px 0}
+.workspace-view .home-events strong{font:600 15px/1.5 'DM Sans',Arial,sans-serif}
+.workspace-view .home-events p{font-size:13px;margin-top:6px}
+.workspace-view .home-events span{font-size:12px}
+.workspace-view .home-notify strong{font:600 14px 'DM Sans',Arial,sans-serif}
+.workspace-view .home-notify p,.workspace-view .home-quiet p{font-size:13px}
+.workspace-view .page-heading .eyebrow{display:none}
+.workspace-view .page-heading h1{font-size:34px;line-height:1.2}
+.workspace-view .page-heading p{font-size:15px}
+.workspace-view .marks-course dt{font-size:12px}
+.workspace-view .marks-pending{font:400 12px 'DM Sans',Arial,sans-serif}
+.workspace-view .marks-course h3{font-size:17px}
+.workspace-view button,.workspace-view a{transition:background .16s ease,color .16s ease,border-color .16s ease}
+.workspace-view button:active{transform:translateY(1px)}
+.workspace-view .home-hero{animation:appear .35s ease-out both}
+@keyframes appear{from{opacity:.25;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.signin-screen{max-width:650px;margin:0 auto;padding:80px 24px;text-align:center;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+.signin-screen .workspace-brand{padding:0}
+.signin-caption{font-size:13px;color:var(--m-muted)}
+.signin-screen h1{font-size:60px;line-height:1.05;margin:0}
+.signin-screen h1 em{font-style:normal;color:var(--m-accent)}
+.signin-screen p{font-size:16px;color:var(--m-muted);line-height:1.6}
+.signin-screen>div{display:flex;gap:12px}.signin-screen>a:last-child{display:flex;gap:8px;align-items:center;color:var(--m-muted);font-size:14px}
+.auth-view .main{margin:0}.auth-view .content{padding:0;max-width:none}.auth-view .content>footer{display:none}
+@media(max-width:1150px){.workspace-view .home-main{grid-template-columns:1fr}.workspace-view .home-hero>img{right:-180px;opacity:.4}.workspace-view .home-activity{margin:0}.workspace-view .course-row{grid-template-columns:minmax(0,1fr) 240px}}
+@media(max-width:700px){.workspace-view .workspace-brand{padding:0;font-size:24px}.workspace-toolbar{padding:0 20px;height:58px}.workspace-toolbar>div{font-size:12px;gap:8px}.workspace-toolbar .button{font-size:12px;padding:8px;min-height:38px}.workspace-view .content{padding:20px 16px 104px}.workspace-view .home-hero{height:264px;border-radius:14px}.workspace-view .home-hero-copy{padding:24px;max-width:100%}.workspace-view .home-hero h1{font-size:37px;margin:17px 0 10px}.workspace-view .home-hero p{font-size:14px;max-width:275px}.workspace-view .home-sync{left:24px;bottom:23px;font-size:12px}.workspace-view .home-hero>img{width:420px;right:-160px;opacity:.25}.workspace-view .home-metrics{gap:8px}.workspace-view .home-metrics>div{padding:16px 11px;border-radius:10px}.workspace-view .home-metrics strong{font-size:26px}.workspace-view .home-metrics span{font-size:12px;line-height:1.4}.workspace-view .home-main{display:grid;gap:20px;padding-top:20px}.workspace-view .home-courses,.workspace-view .home-activity{padding:18px 16px}.workspace-view .home-section-title h2{font-size:21px}.workspace-view .course-row{display:block;padding:18px 0}.workspace-view .course-row>strong{font-size:16px;margin:5px 0 13px;line-height:1.4}.workspace-view .course-row-top{font-size:12px}.workspace-view .course-marks{gap:8px}.workspace-view .course-marks>span{font-size:11px;padding:9px 6px}.workspace-view .course-marks b{font-size:15px}.workspace-view .course-marks b small{font-size:12px}.workspace-view .mobile-bottom-nav button{font-size:11px;font-weight:500;min-height:52px}.workspace-view .page-heading h1{font-size:29px}.workspace-view .page-heading p{font-size:14px}.workspace-view .page-heading .button{display:none}.signin-screen h1{font-size:46px}}
+@media(prefers-reduced-motion:reduce){.app-shell *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Keep data tables free from the marketing label styles. */
+.workspace-view .marks-table th{letter-spacing:0;text-transform:none;text-align:left}
+.workspace-view .marks-table tbody th{color:var(--m-ink);font-size:15px}
+.workspace-view .marks-table td{font-variant-numeric:tabular-nums;text-align:left;font-size:15px}
+.workspace-view .marks-table small{font-weight:400;margin-top:4px}
+.workspace-view .marks-switch button[aria-pressed="true"]{background:var(--m-ink);color:var(--m-bg);font-weight:600}
+.workspace-view :is(button,a):focus-visible,.auth-view :is(button,a):focus-visible{outline:2px solid var(--m-accent);outline-offset:4px}
