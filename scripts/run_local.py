@@ -1,4 +1,4 @@
-"""Start MUJ Pulse on Windows, macOS, or Linux: python scripts/run_local.py."""
+"""Start MUJheky on Windows, macOS, or Linux: python scripts/run_local.py."""
 import os
 from pathlib import Path
 import shutil
@@ -52,7 +52,7 @@ def main():
                 with urllib.request.urlopen('http://localhost:3000/api/health', timeout=2) as response:
                     if response.status == 200:
                         webbrowser.open('http://localhost:3000')
-                        print('\nMUJ Pulse: http://localhost:3000 — sign in and connect SLCM. Ctrl+C stops all services.\n')
+                        print('\nMUJheky: http://localhost:3000 — sign in and connect SLCM. Ctrl+C stops all services.\n')
                         break
             except OSError:
                 time.sleep(1)
