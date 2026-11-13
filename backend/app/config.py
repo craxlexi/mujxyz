@@ -8,7 +8,8 @@ load_dotenv(Path(__file__).resolve().parents[1] / '.env', override=False)
 DB_PATH = os.getenv('DATABASE_PATH', './data/pulse.db')
 APP_ORIGIN = os.getenv('APP_ORIGIN', 'http://localhost:3000').rstrip('/')
 SECURE_COOKIES = os.getenv('SECURE_COOKIES', 'false').lower() == 'true'
-DEMO_ENABLED = os.getenv('DEMO_ENABLED', 'true').lower() == 'true'
+DEMO_ENABLED = os.getenv('DEMO_ENABLED', 'false').lower() == 'true'
+PORTAL_ENABLED = os.getenv('PORTAL_ENABLED', 'false').lower() == 'true'
 KEY = os.getenv('ENCRYPTION_KEY', '')
 ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', '').lower()
 VAPID_PUBLIC = os.getenv('VAPID_PUBLIC_KEY', '')

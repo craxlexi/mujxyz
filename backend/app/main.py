@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from . import config
 from .db import db, init
 from .security import password_hash, password_matches, token_hash, encrypt
-from .portal import SLCMClient, demo_snapshot
+from .portal import SLCMClient, PortalUnavailable, PortalAuthenticationError, demo_snapshot
 from .changes import save_snapshot
 from .worker import effective_interval
 
@@ -159,25 +159,32 @@ def dashboard(user=Depends(current_user)):
 class ConnectInput(BaseModel):
     email: str = Field(min_length=5, max_length=254)
     password: str = Field(min_length=1, max_length=256)
-    semester: int = Field(ge=1, le=12)
+    semester: int = Field(ge=1, le=10)
 
 @app.post('/api/account/connect')
-def connect(body: ConnectInput, user=Depends(current_user)):
+def connect(body: ConnectInput, request: Request, user=Depends(current_user)):
     if user['is_demo']:
         raise HTTPException(409, 'Create a real account before connecting SLCM')
     if not SLCMClient.enabled:
         raise HTTPException(503, 'SLCM integration is awaiting verification. Your portal credentials have not been stored or sent.')
     if not config.KEY:
         raise HTTPException(503, 'Credential encryption is not configured')
+    limit(request, 'portal-connect', 10)
     credentials = {'email': body.email, 'password': body.password}
     # The verified adapter must enforce finite timeouts and handle expired sessions.
-    snapshot = SLCMClient().fetch(credentials, body.semester)
-    from .changes import validate_snapshot
-    validate_snapshot(snapshot)
-    encrypted = encrypt(credentials)
-    with db() as conn:
-        conn.execute('INSERT INTO accounts(user_id,credentials,semester,next_check) VALUES(?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET credentials=excluded.credentials,semester=excluded.semester,next_check=excluded.next_check,paused=0', (user['id'], encrypted, body.semester, time.time()))
-    save_snapshot(user['id'], body.semester, snapshot)
+    try:
+        snapshot = SLCMClient().fetch(credentials, body.semester)
+        encrypted = encrypt(credentials)
+        # Account replacement and snapshot validation must succeed together.
+        # An incomplete reconnect must preserve the original credentials too.
+        with db() as conn:
+            conn.execute('BEGIN IMMEDIATE')
+            conn.execute('INSERT INTO accounts(user_id,credentials,semester,next_check) VALUES(?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET credentials=excluded.credentials,semester=excluded.semester,next_check=excluded.next_check,paused=0', (user['id'], encrypted, body.semester, time.time()))
+            save_snapshot(user['id'], body.semester, snapshot, connection=conn)
+    except PortalAuthenticationError as exc:
+        raise HTTPException(422, str(exc)) from None
+    except PortalUnavailable:
+        raise HTTPException(502, 'SLCM check failed; saved results and credentials were preserved') from None
     return {'ok': True}
 
 class AccountInput(BaseModel):

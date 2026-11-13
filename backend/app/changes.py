@@ -1,6 +1,7 @@
 import json
 import time
 import uuid
+from contextlib import nullcontext
 from decimal import Decimal
 from .db import db
 from .portal import PortalUnavailable
@@ -53,6 +54,10 @@ def diff(old: dict, new: dict) -> list[dict]:
             raise PortalUnavailable('Published grade disappeared')
         if before.get('grade') != course.get('grade'):
             changes.append({'course': code, 'field': 'Grade', 'old': before.get('grade'), 'new': course.get('grade')})
+        if before.get('credits') is not None and course.get('credits') is None:
+            raise PortalUnavailable('Published credits disappeared')
+        if not equivalent(before.get('credits'), course.get('credits')):
+            changes.append({'course': code, 'field': 'Credits', 'old': before.get('credits'), 'new': course.get('credits')})
     if old.get('official_sgpa') is not None and new.get('official_sgpa') is None:
         raise PortalUnavailable('Published SGPA disappeared')
     if not equivalent(old.get('official_sgpa'), new.get('official_sgpa')):
@@ -60,11 +65,12 @@ def diff(old: dict, new: dict) -> list[dict]:
     return changes
 
 
-def save_snapshot(user_id: str, semester: int, snapshot: dict, require_account=False) -> list[dict]:
+def save_snapshot(user_id: str, semester: int, snapshot: dict, require_account=False, connection=None) -> list[dict]:
     validate_snapshot(snapshot)
     now = time.time()
-    with db() as conn:
-        conn.execute('BEGIN IMMEDIATE')
+    with (nullcontext(connection) if connection is not None else db()) as conn:
+        if connection is None:
+            conn.execute('BEGIN IMMEDIATE')
         if require_account:
             account = conn.execute('SELECT semester FROM accounts WHERE user_id=?', (user_id,)).fetchone()
             if not account or account['semester'] != semester:

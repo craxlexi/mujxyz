@@ -2,20 +2,20 @@
 
 A Next.js student dashboard, FastAPI API, and persistent SQLite background worker for MUJ academic-result monitoring. Designed for a Vercel frontend and a small Linux VPS.
 
-**Status:** working demo and monitoring infrastructure. Live SLCM login, semester selection, marks retrieval, and grade retrieval are **not implemented or verified**: this development environment blocks the portal hostname. The live connection form is disabled, and the API refuses to store/send portal credentials. Do not use this as a live result-monitoring service until the integration checklist below is complete.
+**Status:** authenticated SLCM login and the complete marks, grades, and official GPA fetch were verified on 13 November 2026 with six semester III courses. The GPA was unpublished. The connector uses `curl_cffi` with Chrome impersonation because SLCM rejected the same valid credentials from HTTPX. Live connection and background polling are enabled by the local launcher. Production deployment and external push delivery remain unverified.
 
 ## Implemented
 
 - Separate app registration/login, salted scrypt password hashes, opaque HttpOnly sessions, origin checks and login throttling.
 - Per-student semester, monitoring pause/resume, disconnect, and account deletion.
-- Fernet encryption boundary for future portal credentials; no plaintext credential storage or request-body logging.
+- Fernet encryption for portal credentials; no plaintext credential storage or request-body logging.
 - One lightweight polling worker with SQLite leases, persisted due dates, jitter, finite retries and backoff. No Redis or browser dependency.
 - Validated snapshots, numeric mark comparisons, course/assessment identity, independent semester baselines, change history, grade and official-SGPA change detection. Missing or partial results preserve the last snapshot.
 - Transactional event/outbox writes; web push with a service worker, lock-screen messages without marks, delivery retries, and expired-subscription cleanup.
 - Administrator-only normal/result-period intervals, expiring result mode and global pause. Admin provisioning requires server-terminal access.
 - Isolated synthetic demo accounts and a simulated marks update processed by the actual server worker. Demo accounts expire after 24 hours.
 
-Email, WhatsApp, password reset, verified email ownership, multiple simultaneously monitored semesters, and calculated SGPA are not included. App email is an account identifier; it does not establish ownership of an SLCM account. Production internet signup should wait for email verification/recovery and a verified portal adapter.
+Email, WhatsApp, password reset, verified email ownership, multiple simultaneously monitored semesters, and calculated SGPA are not included. App email is an account identifier; it does not establish ownership of an SLCM account. Production internet signup should wait for email verification/recovery.
 
 ## Local development
 
@@ -45,7 +45,7 @@ cd frontend
 npm run dev
 ```
 
-Open http://localhost:3000 and select **Explore the demo**, then **Simulate a marks update**. The worker picks it up within a few seconds; the dashboard refreshes every ten seconds. That dashboard refresh is only for the visible interface: result checks and notification delivery run on the server even with all browser tabs closed. The first snapshot sends no notification.
+Open http://localhost:3000 and create an app account. Set `PORTAL_ENABLED=true` and configure `ENCRYPTION_KEY` in both API and worker environments to enable live connection. The Windows local launcher does this automatically. The dashboard refreshes every ten seconds; result checks and notification delivery run on the server even with all browser tabs closed. The first snapshot sends no notification.
 
 The defaults work for the demo without keys. To configure encryption and push, copy `backend/.env.example` to `backend/.env`, generate keys with `cd backend && ../.venv/bin/python -m app.keys`, and place them in that ignored file. Keep the encryption key stable and back it up securely; changing it makes saved portal credentials unreadable. Both backend processes automatically load this ignored `.env` file. Existing process environment settings take precedence. Production systemd also loads it explicitly. Never paste secrets into source, Git, shell arguments, or screenshots.
 
@@ -123,16 +123,12 @@ Web push requires HTTPS (localhost is allowed for development). iPhone users nee
 - Use a low-frequency default (60 minutes here). Result-period checking is admin-only and never below five minutes. The worker is serial to limit load; benchmark before increasing concurrency.
 - No email fallback is configured. Users without supported push permissions do not receive external alerts until another channel is implemented.
 
-## Finish the live SLCM adapter
+## Live SLCM connector
 
-`backend/app/portal.py:SLCMClient.enabled` deliberately remains false. Complete these steps before enabling it:
+The authenticated login and complete marks, grades, and official GPA fetch passed on 13 November 2026. The check returned six semester III courses; the official GPA was unpublished. `SLCMSession` uses a browser-like `curl_cffi` transport, a fresh CSRF token and cookie, verified TLS, same-origin redirects, response limits, and finite timeouts. The worker keeps the previous snapshot if a poll fails or returns incomplete data. No credential or private result is included in this repository.
 
-1. Permit `mujslcm.jaipur.manipal.edu` in the development environment's network settings. Inspect the actual public login form and authenticated network flow using a consenting test account entered securely. Do not commit credentials, cookies, student HTML, or screenshots with private data.
-2. Confirm allowed automated access, session expiry, CSRF fields, CAPTCHA/OTP behavior and rate limits. Do not bypass authentication challenges.
-3. Implement finite-timeout, TLS-verified authentication and semester selection. Prefer HTTP requests; keep redirects constrained to verified university/authentication hosts. Never send credentials to an unverified form action or redirect.
-4. Fetch marks at the provided internal-marks page and verify whether data comes from HTML or an authenticated JSON request. The included table parser is based only on the user's screenshot; live markup is unverified.
-5. Inspect the grades page, official SGPA, credits, unpublished states, and full/partial response semantics. Do not guess endpoint names or grade-point rules.
-6. Add sanitized response fixtures and integration tests for valid/invalid login, expired sessions, empty results, mark corrections, missing rows and grade publication. Validate snapshots before storing credentials or replacing saved results.
-7. Enable the adapter only after those checks pass. Then test an external web-push delivery with the website closed and measure memory on the target VPS.
+Run `python scripts/run_local.py` on Windows to install dependencies, create a private local encryption key, and start the live API, worker, and frontend. For manual or VPS deployment, configure `ENCRYPTION_KEY` and `PORTAL_ENABLED=true` for both API and worker. Use `backend/verify_slcm.py` for a private interactive check if the portal changes.
+
+External web-push delivery and production VPS deployment have not been verified. Configure VAPID keys and test delivery with the site closed before relying on push alerts.
 
 No live portal credential from the conversation is included in this project.

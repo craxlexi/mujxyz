@@ -7,7 +7,7 @@ from pywebpush import webpush, WebPushException
 from . import config
 from .db import db, init
 from .security import decrypt
-from .portal import SLCMClient, demo_snapshot
+from .portal import SLCMClient, PortalUnavailable, demo_snapshot
 from .changes import save_snapshot
 
 log = logging.getLogger('pulse.worker')
@@ -29,6 +29,8 @@ def poll_once():
             return False
         conn.execute('UPDATE accounts SET lease_until=? WHERE user_id=?', (now + 180, account['user_id']))
     try:
+        if not account['is_demo'] and not SLCMClient.enabled:
+            raise PortalUnavailable('Live polling is awaiting verification')
         snapshot = demo_snapshot(account['demo_revision']) if account['is_demo'] else SLCMClient().fetch(decrypt(account['credentials']), account['semester'])
         save_snapshot(account['user_id'], account['semester'], snapshot, require_account=True)
         with db() as conn:

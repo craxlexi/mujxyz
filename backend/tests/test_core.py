@@ -19,6 +19,7 @@ def database(tmp_path, monkeypatch):
     monkeypatch.setattr(config, 'KEY', Fernet.generate_key().decode())
     monkeypatch.setattr(config, 'VAPID_PRIVATE', '')
     monkeypatch.setattr(config, 'VAPID_PUBLIC', '')
+    monkeypatch.setattr(config, 'DEMO_ENABLED', True)
     init()
 
 @pytest.fixture
@@ -158,4 +159,52 @@ def test_failed_worker_preserves_baseline_and_backs_off(monkeypatch):
     with db() as conn:
         account = conn.execute('SELECT * FROM accounts').fetchone()
         assert account['failures']==1 and account['next_check']>time.time()
+        assert json.loads(conn.execute('SELECT payload FROM snapshots').fetchone()[0]) == demo_snapshot()
+
+
+def test_live_reconnect_rolls_back_credentials_on_partial_results(client, monkeypatch):
+    from app.portal import SLCMClient
+    body = {'email': 'synthetic@example.com', 'password': 'synthetic-app-password'}
+    client.post('/api/auth/register', json=body)
+    monkeypatch.setattr(SLCMClient, 'enabled', True)
+    monkeypatch.setattr(SLCMClient, 'fetch', lambda *args: demo_snapshot())
+    connect = {'email': 'synthetic@muj.manipal.edu', 'password': 'synthetic-portal-password', 'semester': 3}
+    assert client.post('/api/account/connect', json=connect).status_code == 200
+    with db() as conn:
+        original = dict(conn.execute('SELECT * FROM accounts').fetchone())
+    monkeypatch.setattr(SLCMClient, 'fetch', lambda *args: dict(demo_snapshot(), courses=demo_snapshot()['courses'][:-1]))
+    assert client.post('/api/account/connect', json={**connect, 'password': 'synthetic-new-password'}).status_code == 502
+    with db() as conn:
+        assert dict(conn.execute('SELECT * FROM accounts').fetchone()) == original
+        assert json.loads(conn.execute('SELECT payload FROM snapshots').fetchone()[0]) == demo_snapshot()
+
+
+def test_live_authentication_error_is_actionable_and_stores_nothing(client, monkeypatch):
+    from app.portal import SLCMClient, PortalAuthenticationError
+    client.post('/api/auth/register', json={'email': 'synthetic@example.com', 'password': 'synthetic-app-password'})
+    monkeypatch.setattr(SLCMClient, 'enabled', True)
+
+    def rejected(*args): raise PortalAuthenticationError('SLCM sign-in failed; check your credentials on the portal')
+
+    monkeypatch.setattr(SLCMClient, 'fetch', rejected)
+    result = client.post('/api/account/connect', json={'email': 'synthetic@muj.manipal.edu', 'password': 'synthetic-private-password', 'semester': 3})
+    assert result.status_code == 422 and 'synthetic-private-password' not in result.text
+    with db() as conn: assert conn.execute('SELECT count(*) FROM accounts').fetchone()[0] == 0
+
+
+def test_worker_respects_live_verification_gate(monkeypatch):
+    from app.portal import SLCMClient
+    uid = make_user()
+    with db() as conn:
+        conn.execute('UPDATE users SET is_demo=0 WHERE id=?', (uid,))
+        conn.execute('INSERT INTO accounts(user_id,credentials,semester,next_check) VALUES(?,?,?,?)', (uid, encrypt({'email': 'synthetic', 'password': 'synthetic'}), 3, time.time() - 1))
+    save_snapshot(uid, 3, demo_snapshot())
+    monkeypatch.setattr(SLCMClient, 'enabled', False)
+
+    def must_not_fetch(*args): raise AssertionError('Unverified live polling must not send credentials')
+
+    monkeypatch.setattr(SLCMClient, 'fetch', must_not_fetch)
+    assert poll_once()
+    with db() as conn:
+        assert conn.execute('SELECT failures FROM accounts').fetchone()[0] == 1
         assert json.loads(conn.execute('SELECT payload FROM snapshots').fetchone()[0]) == demo_snapshot()
