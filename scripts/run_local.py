@@ -10,6 +10,19 @@ import webbrowser
 
 ROOT = Path(__file__).resolve().parents[1]
 
+def ensure_local_key(python, local_config):
+    settings = local_config.read_text(encoding='utf-8').splitlines() if local_config.exists() else []
+    keys = [line.split('=', 1)[1].strip() for line in settings if line.strip().startswith('ENCRYPTION_KEY=')]
+    if keys and keys[-1]:
+        return
+    key = subprocess.check_output(
+        [str(python), '-c', 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'],
+        text=True,
+    ).strip()
+    with local_config.open('a', encoding='utf-8') as file:
+        file.write('\nENCRYPTION_KEY=' + key + '\n')
+    print('Created a local encryption key in backend/.env. Keep this file private and backed up.')
+
 def main():
     if sys.version_info < (3, 12):
         raise SystemExit('Install Python 3.12 or newer, then run this command again.')
@@ -20,13 +33,7 @@ def main():
     if not python.exists():
         subprocess.run([sys.executable, '-m', 'venv', str(ROOT / '.venv')], check=True)
     subprocess.run([str(python), '-m', 'pip', 'install', '-r', str(ROOT / 'backend/requirements.txt')], check=True)
-    from cryptography.fernet import Fernet
-    from dotenv import dotenv_values
-    local_config = ROOT / 'backend/.env'
-    if not dotenv_values(local_config).get('ENCRYPTION_KEY'):
-        with local_config.open('a', encoding='utf-8') as file:
-            file.write('\nENCRYPTION_KEY=' + Fernet.generate_key().decode() + '\n')
-        print('Created a local encryption key in backend/.env. Keep this file private and backed up.')
+    ensure_local_key(python, ROOT / 'backend/.env')
     npm_command = [os.environ.get('COMSPEC', 'cmd.exe'), '/d', '/c', npm] if os.name == 'nt' else [npm]
     subprocess.run(npm_command + ['ci', '--no-audit', '--no-fund'], cwd=ROOT / 'frontend', check=True)
     env = dict(os.environ, APP_ORIGIN='http://localhost:3000', API_ORIGIN='http://127.0.0.1:8000', SECURE_COOKIES='false', DEMO_ENABLED='false', PORTAL_ENABLED='true')
