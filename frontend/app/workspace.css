@@ -166,3 +166,37 @@
 .marks-table tbody th strong{font-weight:600}
 @media(max-width:800px){.marks-course{display:block}.marks-course dl{margin-top:13px}}
 @media(max-width:700px){.marks-heading{align-items:start;flex-direction:column}.marks-heading h2{font-size:25px}.marks-switch{width:100%}.marks-switch button{flex:1}.marks-course dl{grid-template-columns:repeat(3,minmax(0,1fr))}.marks-course h3{font-size:17px}.marks-course dd{font-size:14px}}
+.academic-switch{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--w-line);margin-bottom:26px}
+.academic-switch button{white-space:nowrap;min-height:48px;padding:0 18px;position:relative;color:var(--w-subtle);font-size:14px}
+.academic-switch button[aria-current=page]{color:var(--m-ink);font-weight:700}
+.academic-switch button[aria-current=page]:after{content:'';position:absolute;bottom:0;left:18px;right:18px;height:2px;background:var(--m-accent)}
+.academic-data{min-height:280px}
+.academic-data h2{font:700 28px Space,sans-serif;margin:0 0 5px}
+.academic-data>p{color:var(--w-subtle);font-size:14px;margin:0 0 24px}
+.attendance-row,.timetable-row{display:grid;grid-template-columns:minmax(0,1fr) 145px 70px;gap:16px;align-items:center;border-top:1px solid var(--w-line);min-height:72px;padding:13px 4px}
+.attendance-row small{display:block;color:var(--w-subtle);font-size:12px}
+.attendance-row strong,.timetable-row strong{font-size:15px;font-weight:600;line-height:1.4}
+.attendance-row span,.timetable-row time{color:var(--w-subtle);font-size:13px}
+.attendance-row b{font:700 22px Space,sans-serif;text-align:right}
+.timetable-row{grid-template-columns:175px minmax(0,1fr)}
+@media(max-width:700px){.academic-switch button{font-size:12px;padding:0 12px}.attendance-row{grid-template-columns:minmax(0,1fr) 70px;gap:7px}.attendance-row span{grid-column:1;grid-row:2}.attendance-row b{grid-column:2;grid-row:1/3}.timetable-row{grid-template-columns:100px minmax(0,1fr);gap:12px}.timetable-row strong{font-size:13px}}
+/* Signed-in workspace adopts the reviewed compact navigation. */
+@media(min-width:701px){
+.workspace-header{position:fixed;inset:0 auto 0 0;width:236px;height:100vh;padding:27px 17px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;border-right:1px solid var(--w-line);border-bottom:0;background:var(--m-bg)}
+.workspace-brand{font-size:24px;padding:0 9px 33px}
+.workspace-nav{align-self:stretch;display:flex;flex-direction:column;align-items:stretch;gap:2px}
+.workspace-nav button{height:44px;min-height:44px;text-align:left;padding:0 13px;border-radius:8px;font-size:14px;font-weight:500;color:var(--w-subtle)}
+.workspace-nav button.active{color:var(--m-accent);background:color-mix(in srgb,var(--m-accent) 13%,var(--m-bg))}
+.workspace-nav button.active:after{display:none}
+.workspace-nav button:hover:not(.active){background:var(--w-panel);color:var(--m-ink)}
+.workspace-actions{margin-top:auto;border-top:1px solid var(--w-line);padding-top:14px;display:flex;flex-wrap:wrap;justify-content:space-between}
+.workspace-health{display:flex;margin:0 0 9px;width:100%;font-size:12px}
+.workspace-view .main{margin-left:236px;min-height:100vh}
+.workspace-view .content{max-width:1480px;padding:34px clamp(24px,3vw,44px) 70px}
+}
+@media(min-width:701px) and (max-width:900px){.workspace-header{width:192px}.workspace-view .main{margin-left:192px}}
+@media(max-width:700px){.workspace-header{position:relative;width:auto;flex-direction:row}}
+.workspace-view .home-hero,.workspace-view .notification-settings{border:1px solid var(--w-line)}
+.workspace-view .course-row{transition:background .18s ease,transform .18s ease}
+.workspace-view .course-row:hover{transform:translateX(2px)}
+@media(prefers-reduced-motion:reduce){.workspace-view .course-row{transition:none}}

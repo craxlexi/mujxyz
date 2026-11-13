@@ -159,7 +159,30 @@ class SLCMClient:
             self.check_page(page.text, None, '/GetCGPAGPAForFaculty')
             gpa = session.json(self.academic + '/GetCGPAGPAForFaculty',
                                {'Enrollment': '', 'AcademicYear': '', 'ProgramCode': ''}, gpa_page)
-            return {'courses': courses, 'official_sgpa': parse_official_gpa(gpa, roman), 'complete': True}
+            attendance = timetable = None
+            try:
+                page = session.request('GET', self.academic + '/AttendanceSummaryForStudent')
+                payload = session.json(self.academic + '/GetAttendanceSummaryList',
+                                       {'StudentCode': ''}, self.academic + '/AttendanceSummaryForStudent')
+                attendance = parse_attendance(payload)
+            except (PortalUnavailable, ValueError, KeyError, TypeError):
+                pass  # Optional portal data must never block saved marks.
+            try:
+                from datetime import datetime
+                from zoneinfo import ZoneInfo
+                today = datetime.now(ZoneInfo('Asia/Kolkata')).strftime('%Y-%m-%d')
+                page = session.request('GET', self.academic + '/ViewTimeTableForStudent')
+                response = session.request('POST', self.academic + '/GetStudentCalenderEventList',
+                    data={'Year': '', 'Month': '', 'Type': 'agendaWeek', 'Dated': today, 'PreNext': '2'},
+                    headers={'Origin': session.origin, 'Referer': session.url(self.academic + '/ViewTimeTableForStudent'),
+                             'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json'})
+                if 'application/json' not in response.headers.get('content-type', '').lower():
+                    raise PortalUnavailable('Unexpected timetable response')
+                timetable = parse_timetable(response.json())
+            except (PortalUnavailable, ValueError, KeyError, TypeError):
+                pass
+            return {'courses': courses, 'official_sgpa': parse_official_gpa(gpa, roman),
+                    'attendance': attendance, 'timetable': timetable, 'complete': True}
 
     @staticmethod
     def check_page(html, semester, endpoint):
@@ -179,6 +202,46 @@ def semester_value(semester):
     if type(semester) is not int or not 1 <= semester <= len(values):
         raise PortalUnavailable('SLCM supports semesters 1 through 10')
     return values[semester - 1]
+
+
+def parse_attendance(payload):
+    rows = payload.get('AttendanceSummaryList') if isinstance(payload, dict) else None
+    if not isinstance(rows, list) or len(rows) > 100:
+        raise PortalUnavailable('Unexpected attendance response')
+    result = []
+    for row in rows:
+        if not isinstance(row, dict) or not isinstance(row.get('CourseID'), str):
+            raise PortalUnavailable('Incomplete attendance row')
+        course = row['CourseID'].strip()
+        if not course:
+            raise PortalUnavailable('Empty attendance course')
+        try:
+            total, present = int(row['Total']), int(row['Present'])
+        except (TypeError, ValueError, KeyError):
+            raise PortalUnavailable('Invalid attendance count') from None
+        if total < 0 or present < 0 or present > total:
+            raise PortalUnavailable('Invalid attendance count')
+        code, separator, name = course.partition(':')
+        result.append({'code': code.strip() if separator else '', 'name': name.strip() if separator else course,
+                       'present': present, 'total': total, 'percentage': round(100 * present / total, 1) if total else None})
+    return result
+
+
+def parse_timetable(payload):
+    if not isinstance(payload, list) or len(payload) > 200:
+        raise PortalUnavailable('Unexpected timetable response')
+    result = []
+    for row in payload:
+        if not isinstance(row, dict) or not isinstance(row.get('StartDate'), str) or not isinstance(row.get('Description'), str):
+            raise PortalUnavailable('Incomplete timetable event')
+        start = row['StartDate'].strip()
+        if not re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?', start):
+            raise PortalUnavailable('Invalid timetable date')
+        description = row['Description'].strip()
+        if not description or len(description) > 500:
+            raise PortalUnavailable('Invalid timetable description')
+        result.append({'start': start, 'description': description})
+    return sorted(result, key=lambda item: item['start'])
 
 
 def portal_rows(payload, allow_unpublished=False):
