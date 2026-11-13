@@ -1,6 +1,6 @@
 // No academic results or authenticated API responses are cached.
 self.addEventListener('push', event => {
-  let payload = {title:'MUJ Pulse',body:'Your academic results changed.',url:'/'};
+  let payload = {title:'MUJheky',body:'Your academic results changed.',url:'/'};
   try { payload = {...payload,...event.data.json()}; } catch {}
   event.waitUntil(self.registration.showNotification(payload.title, {body:payload.body,icon:'/icon.svg',badge:'/icon.svg',data:{url:'/'}}));
 });
