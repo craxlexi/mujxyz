@@ -141,3 +141,28 @@
   .app-shell.workspace-view .setting-line{font-size:12px}
   .app-shell.workspace-view .setting-line strong{font-size:12px}
 }
+/* Marks share one source of truth across the compact and tabular views. */
+.marks-panel{margin-bottom:34px;border-top:2px solid var(--m-accent);padding-top:21px}
+.marks-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:18px}
+.marks-heading h2{font:700 28px/1.2 Space,sans-serif;letter-spacing:-.045em;margin:0 0 5px}
+.marks-heading p{font-size:14px;line-height:1.5;color:var(--w-subtle);margin:0}
+.marks-switch{display:flex;gap:3px;padding:3px;border:1px solid var(--w-line);border-radius:8px}
+.marks-switch button{min-height:40px;padding:0 15px;border-radius:5px;font-size:13px;color:var(--w-subtle)}
+.marks-switch button[aria-pressed="true"]{background:var(--w-panel);color:var(--m-ink)}
+.marks-switch button:focus-visible{outline:2px solid var(--m-accent);outline-offset:2px}
+.marks-course{border-top:1px solid var(--w-line);padding:18px 0;display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,2fr);gap:18px;align-items:center}
+.marks-course small,.marks-table th small{display:block;color:var(--w-subtle);font-size:12px;margin-bottom:4px}
+.marks-course h3{font:600 18px/1.3 Space,sans-serif;margin:0;letter-spacing:-.02em}
+.marks-course dl{margin:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.marks-course dl>div{min-width:0;border:1px solid var(--w-line);border-radius:6px;padding:8px}
+.marks-course dt{font-size:11px;color:var(--w-subtle);white-space:nowrap}
+.marks-course dd{font:600 15px Space,sans-serif;margin:5px 0 0;overflow-wrap:anywhere}
+.marks-pending{font:500 12px Jakarta,sans-serif;color:var(--w-subtle)}
+.marks-table-scroll{overflow:auto;border-top:1px solid var(--w-line)}
+.marks-table{width:100%;border-collapse:collapse;min-width:730px;text-align:left}
+.marks-table th,.marks-table td{padding:15px 13px;border-bottom:1px solid var(--w-line);font-size:14px;white-space:nowrap}
+.marks-table thead th{color:var(--w-subtle);font-size:12px;font-weight:600}
+.marks-table tbody th{font-weight:400;white-space:normal;min-width:185px}
+.marks-table tbody th strong{font-weight:600}
+@media(max-width:800px){.marks-course{display:block}.marks-course dl{margin-top:13px}}
+@media(max-width:700px){.marks-heading{align-items:start;flex-direction:column}.marks-heading h2{font-size:25px}.marks-switch{width:100%}.marks-switch button{flex:1}.marks-course dl{grid-template-columns:repeat(3,minmax(0,1fr))}.marks-course h3{font-size:17px}.marks-course dd{font-size:14px}}
