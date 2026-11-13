@@ -20,3 +20,7 @@ The generated building cutout is a draft derived from the supplied MUJ photo. Re
 Open `scroll-prototype.html` and scroll. The front and side cutouts are staged in a sticky hero while the copy changes. This is a two-image perspective/crossfade test, not a true 3D rotation. The middle of the transition shows duplicate architecture because the supplied views have different geometry and camera positions.
 
 For a convincing continuous turn, model the recognizable building in Blender from reference views, then render a short orbit as optimized WebP/AVIF frames. A scroll-linked canvas can scrub those frames while the text and background remain ordinary HTML/CSS. This is likely more predictable on Android than shipping an interactive WebGL scene. Include a static view for reduced-motion users and slower devices.
+
+## 3D turn study
+
+Open `model-turn.html` and scroll. This version uses a true 3D model rather than blending two photographs. The editable Blender file and portable GLB are in `model/`; the page scrubs 32 optimized renders from front to an angled view. The building is a stylized first pass based on the supplied photos, so review its architectural fidelity before using it as final art.
