@@ -17,9 +17,9 @@ The generated building cutout is a draft derived from the supplied MUJ photo. Re
 
 ## Photographic scroll turn
 
-Open `photo-turn.html` and scroll. This is the current direction for the landing hero: thirteen transparent building views, including the two original cutouts, scrubbed from front to side. Eleven intermediate views were generated from the supplied references. The page offers light and dark themes and a static view for reduced-motion users. The optimized frames total about 2 MB.
+Open `photo-turn.html` using `python design-concepts/serve_video.py` from the repository root, then scroll. The current study uses a transparent video moving from the supplied front view to the supplied side view, with the dome pinned in place. The video is scrubbed by page scroll. It offers light and dark themes and a static view for reduced-motion users.
 
-The intermediate angles are generated image edits, so some architectural details shift subtly from frame to frame. Review the motion on a phone before using the sequence as final landing art.
+The video interpolates eleven generated intermediate angles between the two cutouts. Architectural details can shift during the turn, so review the motion on a phone before using it as final landing art. The source frames remain in `photo-turn/`; the video and build script are in `video-turn/`.
 
 `scroll-prototype.html` preserves the earlier two-image study for comparison.
 
