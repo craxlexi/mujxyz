@@ -15,12 +15,14 @@ This is a static design study. Course names, marks and sync time on the app scre
 
 The generated building cutout is a draft derived from the supplied MUJ photo. Refine edges and verify building details before production use. Keep the oversized art on marketing surfaces; functional result pages should prioritize data.
 
-## Scroll turn study
+## Photographic scroll turn
 
-Open `scroll-prototype.html` and scroll. The front and side cutouts are staged in a sticky hero while the copy changes. This is a two-image perspective/crossfade test, not a true 3D rotation. The middle of the transition shows duplicate architecture because the supplied views have different geometry and camera positions.
+Open `photo-turn.html` and scroll. This is the current direction for the landing hero: thirteen transparent building views, including the two original cutouts, scrubbed from front to side. Eleven intermediate views were generated from the supplied references. The page offers light and dark themes and a static view for reduced-motion users. The optimized frames total about 2 MB.
 
-For a convincing continuous turn, model the recognizable building in Blender from reference views, then render a short orbit as optimized WebP/AVIF frames. A scroll-linked canvas can scrub those frames while the text and background remain ordinary HTML/CSS. This is likely more predictable on Android than shipping an interactive WebGL scene. Include a static view for reduced-motion users and slower devices.
+The intermediate angles are generated image edits, so some architectural details shift subtly from frame to frame. Review the motion on a phone before using the sequence as final landing art.
+
+`scroll-prototype.html` preserves the earlier two-image study for comparison.
 
 ## 3D turn study
 
-Open `model-turn.html` and scroll. This version uses a true 3D model rather than blending two photographs. The editable Blender file and portable GLB are in `model/`; the page scrubs 32 optimized renders from front to an angled view. The building is a stylized first pass based on the supplied photos, so review its architectural fidelity before using it as final art.
+`model-turn.html` and `model/` preserve the stylized 3D experiment. It was set aside because its look did not match the photographic direction.
