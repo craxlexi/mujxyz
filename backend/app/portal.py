@@ -1,5 +1,6 @@
 """SLCM transport and parsing. Live polling stays gated until authenticated verification."""
 import re
+import time
 from decimal import Decimal, InvalidOperation
 from urllib.parse import urljoin, urlsplit
 import httpx
@@ -24,6 +25,7 @@ class SLCMSession:
     user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36'
 
     def __init__(self, transport=None):
+        self.deadline = time.monotonic() + 120
         self.mock_transport = transport is not None
         if self.mock_transport:
             self.client = httpx.Client(
@@ -55,7 +57,11 @@ class SLCMSession:
         url = self.url(target)
         try:
             for _ in range(6):
-                options = {} if self.mock_transport else {'allow_redirects': False, 'timeout': 20, 'verify': True}
+                remaining = self.deadline - time.monotonic()
+                if remaining <= 0:
+                    raise PortalUnavailable('Portal check deadline exceeded')
+                # Entire check must finish before the worker's 180-second lease expires.
+                options = {'timeout': min(20, remaining)} if self.mock_transport else {'allow_redirects': False, 'timeout': min(20, remaining), 'verify': True}
                 with self.client.stream(method, url, data=data, headers=headers, **options) as response:
                     body = bytearray()
                     chunks = response.iter_bytes() if self.mock_transport else response.iter_content()
@@ -142,6 +148,7 @@ class SLCMClient:
             session.login(credentials)
             marks_page = self.academic + '/InternalMarkForStudent'
             page = session.request('GET', marks_page)
+            student_name = parse_student_name(page.text)
             self.check_page(page.text, roman, '/GetInternalMarkForFaculty')
             marks = session.json(self.academic + '/GetInternalMarkForFaculty',
                                  {'Enrollment': '', 'Semester': roman}, marks_page)
@@ -181,7 +188,7 @@ class SLCMClient:
                 timetable = parse_timetable(response.json())
             except (PortalUnavailable, ValueError, KeyError, TypeError):
                 pass
-            return {'courses': courses, 'official_sgpa': parse_official_gpa(gpa, roman),
+            return {'courses': courses, 'student': {'name': student_name}, 'official_sgpa': parse_official_gpa(gpa, roman),
                     'attendance': attendance, 'timetable': timetable, 'complete': True}
 
     @staticmethod
@@ -195,6 +202,17 @@ class SLCMClient:
             selector = soup.select_one('select[name="Semester"]')
             if not selector or semester not in {o.get('value') for o in selector.find_all('option')}:
                 raise PortalUnavailable('Selected semester is not available on SLCM')
+
+
+def parse_student_name(html):
+    """Only explicit student-name metadata; never infer identity from login/email."""
+    soup = BeautifulSoup(html, 'html.parser')
+    for node in soup.select('[data-student-name], #StudentName, [name="StudentName"], #studentName'):
+        raw = node.get('data-student-name') or node.get('value') or node.get_text(' ', strip=True)
+        name = ' '.join(str(raw or '').split())
+        if 2 <= len(name) <= 120 and any(c.isalpha() for c in name) and not any(c in name for c in '<>@'):
+            return name
+    return None
 
 
 def semester_value(semester):
@@ -281,7 +299,8 @@ def parse_marks_json(payload):
         if not match or not columns.keys() <= row.keys():
             raise PortalUnavailable('Incomplete course or assessment record')
         courses.append({'code': match[2].upper(), 'name': match[1].strip(),
-                        'marks': {label: portal_number(row[key]) for key, label in columns.items()},
+                        'marks': {**{label: portal_number(row[key]) for key, label in columns.items()},
+                                  **({'ETE': portal_number(row['ETE'])} if 'ETE' in row else {})},
                         'grade': None, 'credits': None})
     if not courses or len({c['code'] for c in courses}) != len(courses):
         raise PortalUnavailable('Empty or duplicate course records')

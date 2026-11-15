@@ -39,6 +39,9 @@ CREATE TABLE IF NOT EXISTS settings (
  paused INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS rate_limits (key TEXT PRIMARY KEY, count INTEGER NOT NULL, reset REAL NOT NULL);
+CREATE INDEX IF NOT EXISTS events_user_created ON events(user_id, created DESC);
+CREATE INDEX IF NOT EXISTS accounts_due ON accounts(next_check) WHERE paused=0;
+CREATE INDEX IF NOT EXISTS deliveries_due ON deliveries(next_attempt) WHERE delivered IS NULL AND attempts<5;
 INSERT OR IGNORE INTO settings(id) VALUES(1);
 '''
 

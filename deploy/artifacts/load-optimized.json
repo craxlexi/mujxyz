@@ -1,0 +1,109 @@
+[
+  {
+    "origin": "https://api-mujheky.lyaxsh.com",
+    "target_rps": 10,
+    "seconds": 15,
+    "requests": 150,
+    "achieved_rps": 10.0,
+    "p50_ms": 83,
+    "p95_ms": 117,
+    "p99_ms": 256,
+    "max_ms": 556,
+    "errors": 0,
+    "statuses": {
+      "200": 150
+    }
+  },
+  {
+    "origin": "https://api-mujheky.lyaxsh.com",
+    "target_rps": 25,
+    "seconds": 15,
+    "requests": 375,
+    "achieved_rps": 24.9,
+    "p50_ms": 84,
+    "p95_ms": 445,
+    "p99_ms": 692,
+    "max_ms": 789,
+    "errors": 0,
+    "statuses": {
+      "200": 375
+    }
+  },
+  {
+    "origin": "https://api-mujheky.lyaxsh.com",
+    "target_rps": 50,
+    "seconds": 15,
+    "requests": 750,
+    "achieved_rps": 46.7,
+    "p50_ms": 400,
+    "p95_ms": 2021,
+    "p99_ms": 3102,
+    "max_ms": 4201,
+    "errors": 0,
+    "statuses": {
+      "200": 750
+    }
+  },
+  {
+    "origin": "https://mujheky.lyaxsh.com",
+    "target_rps": 10,
+    "seconds": 15,
+    "requests": 150,
+    "achieved_rps": 10.0,
+    "p50_ms": 106,
+    "p95_ms": 323,
+    "p99_ms": 700,
+    "max_ms": 702,
+    "errors": 0,
+    "statuses": {
+      "200": 150
+    }
+  },
+  {
+    "origin": "https://mujheky.lyaxsh.com",
+    "target_rps": 25,
+    "seconds": 15,
+    "requests": 375,
+    "achieved_rps": 24.9,
+    "p50_ms": 100,
+    "p95_ms": 420,
+    "p99_ms": 730,
+    "max_ms": 767,
+    "errors": 0,
+    "statuses": {
+      "200": 375
+    }
+  },
+  {
+    "origin": "https://mujheky.lyaxsh.com",
+    "target_rps": 50,
+    "seconds": 15,
+    "requests": 750,
+    "achieved_rps": 49.7,
+    "p50_ms": 114,
+    "p95_ms": 624,
+    "p99_ms": 765,
+    "max_ms": 938,
+    "errors": 0,
+    "statuses": {
+      "200": 750
+    }
+  },
+  {
+    "origin": "https://mujheky.lyaxsh.com",
+    "target_rps": 100,
+    "seconds": 15,
+    "requests": 1500,
+    "achieved_rps": 75.5,
+    "p50_ms": 332,
+    "p95_ms": 2863,
+    "p99_ms": 5014,
+    "max_ms": 5781,
+    "errors": 15,
+    "statuses": {
+      "200": 1485,
+      "ReadTimeout": 14,
+      "ConnectTimeout": 1
+    }
+  }
+]

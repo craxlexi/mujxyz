@@ -1,0 +1,47 @@
+[
+  {
+    "origin": "https://api-mujheky.lyaxsh.com",
+    "target_rps": 10,
+    "seconds": 15,
+    "requests": 150,
+    "achieved_rps": 8.9,
+    "p50_ms": 97,
+    "p95_ms": 2436,
+    "p99_ms": 2703,
+    "max_ms": 2811,
+    "errors": 0,
+    "statuses": {
+      "200": 150
+    }
+  },
+  {
+    "origin": "https://mujheky.lyaxsh.com",
+    "target_rps": 10,
+    "seconds": 15,
+    "requests": 150,
+    "achieved_rps": 10.0,
+    "p50_ms": 116,
+    "p95_ms": 1341,
+    "p99_ms": 1677,
+    "max_ms": 1776,
+    "errors": 0,
+    "statuses": {
+      "200": 150
+    }
+  },
+  {
+    "origin": "https://mujheky.lyaxsh.com",
+    "target_rps": 25,
+    "seconds": 15,
+    "requests": 375,
+    "achieved_rps": 24.9,
+    "p50_ms": 133,
+    "p95_ms": 3408,
+    "p99_ms": 3758,
+    "max_ms": 4425,
+    "errors": 0,
+    "statuses": {
+      "200": 375
+    }
+  }
+]
