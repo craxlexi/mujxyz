@@ -8,7 +8,7 @@ from cryptography.fernet import Fernet
 from app import config
 from app.db import db, init
 from app.main import app
-from app.portal import demo_snapshot, parse_marks_table, PortalUnavailable
+from app.portal import SLCMClient, demo_snapshot, parse_marks_table, PortalUnavailable
 from app.changes import save_snapshot, diff
 from app.security import encrypt, decrypt, password_hash, password_matches
 from app.worker import poll_once, effective_interval, deliver_once
@@ -20,6 +20,8 @@ def database(tmp_path, monkeypatch):
     monkeypatch.setattr(config, 'VAPID_PRIVATE', '')
     monkeypatch.setattr(config, 'VAPID_PUBLIC', '')
     monkeypatch.setattr(config, 'DEMO_ENABLED', True)
+    monkeypatch.setattr(config, 'SECURE_COOKIES', False)
+    monkeypatch.setattr(SLCMClient, 'enabled', False)
     init()
 
 @pytest.fixture
@@ -208,3 +210,138 @@ def test_worker_respects_live_verification_gate(monkeypatch):
     with db() as conn:
         assert conn.execute('SELECT failures FROM accounts').fetchone()[0] == 1
         assert json.loads(conn.execute('SELECT payload FROM snapshots').fetchone()[0]) == demo_snapshot()
+
+
+def test_push_device_status_and_disable_are_user_scoped(client, monkeypatch):
+    monkeypatch.setattr(config, 'VAPID_PRIVATE', 'synthetic')
+    monkeypatch.setattr(config, 'VAPID_PUBLIC', 'synthetic')
+    assert client.post('/api/push/device', json={'endpoint': 'https://fcm.googleapis.com/one'}).status_code == 401
+    client.post('/api/auth/demo', json={})
+    one = {'endpoint': 'https://fcm.googleapis.com/one', 'keys': {'p256dh': 'x'*65, 'auth': 'y'*16}}
+    two = {**one, 'endpoint': 'https://fcm.googleapis.com/two'}
+    assert client.post('/api/push/subscribe', json=one).status_code == 200
+    assert client.post('/api/push/subscribe', json=two).status_code == 200
+    assert client.post('/api/push/device', json={'endpoint': one['endpoint']}).json() == {'subscribed': True}
+    client.post('/api/auth/demo', json={})
+    assert client.post('/api/push/device', json={'endpoint': one['endpoint']}).json() == {'subscribed': False}
+    assert client.request('DELETE', '/api/push/device', json={'endpoint': one['endpoint']}).status_code == 200
+    with db() as conn: assert conn.execute('SELECT count(*) FROM subscriptions').fetchone()[0] == 2
+
+
+def test_push_existing_device_at_limit_and_other_devices_survive(client, monkeypatch):
+    monkeypatch.setattr(config, 'VAPID_PRIVATE', 'synthetic')
+    monkeypatch.setattr(config, 'VAPID_PUBLIC', 'synthetic')
+    client.post('/api/auth/demo', json={})
+    bodies = [{'endpoint': f'https://fcm.googleapis.com/device-{i}', 'keys': {'p256dh': 'x'*65, 'auth': 'y'*16}} for i in range(11)]
+    for body in bodies[:10]: assert client.post('/api/push/subscribe', json=body).status_code == 200
+    assert client.post('/api/push/subscribe', json=bodies[0]).status_code == 200
+    assert client.post('/api/push/subscribe', json=bodies[10]).status_code == 409
+    assert client.request('DELETE', '/api/push/device', json={'endpoint': bodies[0]['endpoint']}).status_code == 200
+    assert client.post('/api/push/device', json={'endpoint': bodies[0]['endpoint']}).json() == {'subscribed': False}
+    assert client.post('/api/push/device', json={'endpoint': bodies[1]['endpoint']}).json() == {'subscribed': True}
+    assert client.get('/api/dashboard').json()['push']['subscriptions'] == 9
+    assert client.request('DELETE', '/api/push/subscribe', json={}).status_code == 200
+    assert client.get('/api/dashboard').json()['push']['subscriptions'] == 0
+
+
+def test_push_routes_to_activity_without_private_marks(monkeypatch):
+    uid = make_user()
+    with db() as conn: conn.execute('INSERT INTO subscriptions VALUES(?,?,?)', ('synthetic-sub', uid, '{}'))
+    save_snapshot(uid, 3, demo_snapshot())
+    save_snapshot(uid, 3, demo_snapshot(1))
+    monkeypatch.setattr(config, 'VAPID_PRIVATE', 'synthetic')
+    sent = []
+    monkeypatch.setattr('app.worker.webpush', lambda **kwargs: sent.append(json.loads(kwargs['data'])))
+    deliver_once()
+    assert len(sent) == 1 and sent[0]['url'] == '/app?tab=activity'
+    assert 'CSC2102' not in json.dumps(sent) and '23' not in json.dumps(sent)
+
+
+def test_only_explicit_sample_notifications_include_mark_details():
+    from app.worker import push_payload
+    sample = {'course': 'TEST ONLY - Sample course', 'field': 'MTE 1', 'old': '18', 'new': '21'}
+    detailed = push_payload([sample])
+    assert 'TEST' in detailed['title']
+    assert 'MTE 1: 18 → 21 (+3)' in detailed['body']
+    real = {**sample, 'course': 'CSC2102'}
+    for changes in ([real], [sample, real], []):
+        private = push_payload(changes)
+        assert '18' not in private['body'] and '21' not in private['body']
+        assert private['url'] == '/app?tab=activity'
+
+
+def test_history_query_uses_index():
+    with db() as conn:
+        plan = conn.execute('EXPLAIN QUERY PLAN SELECT * FROM events WHERE user_id=? ORDER BY created DESC LIMIT 30', ('synthetic',)).fetchall()
+        assert any('events_user_created' in row['detail'] for row in plan)
+        assert not any('TEMP B-TREE' in row['detail'] for row in plan)
+
+
+def test_parallel_pollers_claim_distinct_accounts_once(monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+    users = [make_user(), make_user()]
+    with db() as conn:
+        for uid in users:
+            conn.execute('INSERT INTO accounts(user_id,credentials,semester,next_check) VALUES(?,?,3,0)', (uid, ''))
+    barrier = Barrier(2)
+    snapshot = demo_snapshot()
+    def fetch(revision):
+        barrier.wait(timeout=3)
+        return deepcopy(snapshot)
+    monkeypatch.setattr('app.worker.demo_snapshot', fetch)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        jobs = [pool.submit(poll_once) for _ in users]
+        assert all(job.result(timeout=5) for job in jobs)
+    assert not poll_once()
+    with db() as conn:
+        assert conn.execute('SELECT count(*) FROM snapshots').fetchone()[0] == 2
+        assert all(row['failures'] == 0 and row['lease_until'] == 0 for row in conn.execute('SELECT * FROM accounts'))
+
+
+def test_push_delivery_continues_while_both_pollers_block(monkeypatch):
+    from threading import Event, Lock
+    from app.worker import run_worker
+    stop, started, delivered = Event(), Event(), Event()
+    lock = Lock()
+    count = 0
+    def poll():
+        nonlocal count
+        with lock:
+            count += 1
+            if count == 2:
+                started.set()
+        assert delivered.wait(3)
+        return True
+    def deliver():
+        try:
+            assert started.wait(3)
+        finally:
+            stop.set()
+            delivered.set()
+    monkeypatch.setattr('app.worker.poll_once', poll)
+    monkeypatch.setattr('app.worker.deliver_once', deliver)
+    run_worker(stop)
+    assert count == 2 and delivered.is_set()
+
+
+@pytest.mark.parametrize('fails', [False, True])
+def test_old_poll_cannot_overwrite_reconnected_account(monkeypatch, fails):
+    uid = make_user()
+    with db() as conn:
+        conn.execute('INSERT INTO accounts(user_id,credentials,semester,next_check) VALUES(?,?,3,0)', (uid, 'old'))
+    save_snapshot(uid, 3, demo_snapshot())
+    def reconnect(revision):
+        with db() as conn:
+            conn.execute("UPDATE accounts SET credentials='new',lease_until=0,next_check=?,status='Reconnected' WHERE user_id=?", (time.time() + 9999, uid))
+        save_snapshot(uid, 3, demo_snapshot(1))
+        if fails:
+            raise PortalUnavailable('Old session expired')
+        return demo_snapshot()
+    monkeypatch.setattr('app.worker.demo_snapshot', reconnect)
+    assert poll_once()
+    with db() as conn:
+        account = conn.execute('SELECT * FROM accounts WHERE user_id=?', (uid,)).fetchone()
+        assert account['credentials'] == 'new' and account['status'] == 'Reconnected'
+        assert account['failures'] == 0 and account['lease_until'] == 0
+        assert json.loads(conn.execute('SELECT payload FROM snapshots WHERE user_id=?', (uid,)).fetchone()[0]) == demo_snapshot(1)

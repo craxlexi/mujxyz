@@ -1,0 +1,107 @@
+[
+  {
+    "origin": "https://api-mujheky.lyaxsh.com",
+    "target_rps": 10,
+    "seconds": 15,
+    "requests": 150,
+    "achieved_rps": 10.0,
+    "p50_ms": 100,
+    "p95_ms": 394,
+    "p99_ms": 668,
+    "max_ms": 700,
+    "errors": 0,
+    "statuses": {
+      "200": 150
+    }
+  },
+  {
+    "origin": "https://api-mujheky.lyaxsh.com",
+    "target_rps": 25,
+    "seconds": 15,
+    "requests": 375,
+    "achieved_rps": 24.9,
+    "p50_ms": 91,
+    "p95_ms": 266,
+    "p99_ms": 491,
+    "max_ms": 799,
+    "errors": 0,
+    "statuses": {
+      "200": 375
+    }
+  },
+  {
+    "origin": "https://api-mujheky.lyaxsh.com",
+    "target_rps": 50,
+    "seconds": 15,
+    "requests": 750,
+    "achieved_rps": 48.4,
+    "p50_ms": 888,
+    "p95_ms": 1385,
+    "p99_ms": 1508,
+    "max_ms": 1583,
+    "errors": 0,
+    "statuses": {
+      "200": 750
+    }
+  },
+  {
+    "origin": "https://api-mujheky.lyaxsh.com",
+    "target_rps": 100,
+    "seconds": 15,
+    "requests": 1500,
+    "achieved_rps": 41.7,
+    "p50_ms": 2725,
+    "p95_ms": 9303,
+    "p99_ms": 12997,
+    "max_ms": 22410,
+    "errors": 0,
+    "statuses": {
+      "200": 1500
+    }
+  },
+  {
+    "origin": "https://mujheky.lyaxsh.com",
+    "target_rps": 10,
+    "seconds": 15,
+    "requests": 150,
+    "achieved_rps": 10.0,
+    "p50_ms": 112,
+    "p95_ms": 261,
+    "p99_ms": 350,
+    "max_ms": 389,
+    "errors": 0,
+    "statuses": {
+      "200": 150
+    }
+  },
+  {
+    "origin": "https://mujheky.lyaxsh.com",
+    "target_rps": 25,
+    "seconds": 15,
+    "requests": 375,
+    "achieved_rps": 24.9,
+    "p50_ms": 105,
+    "p95_ms": 211,
+    "p99_ms": 298,
+    "max_ms": 479,
+    "errors": 0,
+    "statuses": {
+      "200": 375
+    }
+  },
+  {
+    "origin": "https://mujheky.lyaxsh.com",
+    "target_rps": 50,
+    "seconds": 15,
+    "requests": 750,
+    "achieved_rps": 45.5,
+    "p50_ms": 1185,
+    "p95_ms": 1991,
+    "p99_ms": 2140,
+    "max_ms": 2635,
+    "errors": 0,
+    "statuses": {
+      "200": 750
+    }
+  }
+]

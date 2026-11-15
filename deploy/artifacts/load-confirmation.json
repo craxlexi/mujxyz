@@ -1,0 +1,32 @@
+[
+  {
+    "origin": "https://api-mujheky.lyaxsh.com",
+    "target_rps": 25,
+    "seconds": 60,
+    "requests": 1500,
+    "achieved_rps": 25.0,
+    "p50_ms": 99,
+    "p95_ms": 691,
+    "p99_ms": 1530,
+    "max_ms": 2062,
+    "errors": 0,
+    "statuses": {
+      "200": 1500
+    }
+  },
+  {
+    "origin": "https://mujheky.lyaxsh.com",
+    "target_rps": 10,
+    "seconds": 60,
+    "requests": 600,
+    "achieved_rps": 10.0,
+    "p50_ms": 109,
+    "p95_ms": 167,
+    "p99_ms": 274,
+    "max_ms": 754,
+    "errors": 0,
+    "statuses": {
+      "200": 600
+    }
+  }
+]

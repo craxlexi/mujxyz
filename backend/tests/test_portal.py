@@ -105,6 +105,17 @@ def test_timeout_and_denied_access_are_safe():
             session.request('GET', '/')
 
 
+def test_portal_check_has_total_deadline_before_worker_lease(monkeypatch):
+    import time
+    called = []
+    with SLCMSession(httpx.MockTransport(lambda request: called.append(request) or httpx.Response(200))) as session:
+        assert 119 < session.deadline - time.monotonic() <= 120
+        monkeypatch.setattr('app.portal.time.monotonic', lambda: session.deadline + 1)
+        with pytest.raises(PortalUnavailable, match='deadline'):
+            session.request('GET', '/')
+    assert called == []
+
+
 @pytest.fixture
 def marks():
     # Synthetic values; keys are from the inspected authenticated page script.

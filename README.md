@@ -2,14 +2,14 @@
 
 A Next.js student dashboard, FastAPI API, and persistent SQLite background worker for MUJ academic-result monitoring. Designed for a Vercel frontend and a small Linux VPS.
 
-**Status:** authenticated SLCM login and the complete marks, grades, and official GPA fetch were verified on 13 November 2026 with six semester III courses. The GPA was unpublished. The connector uses `curl_cffi` with Chrome impersonation because SLCM rejected the same valid credentials from HTTPX. Live connection and background polling are enabled by the local launcher. Production deployment and external push delivery remain unverified.
+**Status:** deployed to Vercel and the production VPS at https://mujheky.lyaxsh.com on 14 November 2026. Authenticated SLCM login and the complete marks, grades, and official GPA fetch were verified on 13 November with six semester III courses; GPA was unpublished. The connector uses `curl_cffi` with Chrome impersonation because SLCM rejected the same valid credentials from HTTPX. Production HTTPS, authentication and synthetic push delivery were verified. Capacity measurements and their limits are recorded in `deploy/artifacts/`.
 
 ## Implemented
 
 - Separate app registration/login, salted scrypt password hashes, opaque HttpOnly sessions, origin checks and login throttling.
 - Per-student semester, monitoring pause/resume, disconnect, and account deletion.
 - Fernet encryption for portal credentials; no plaintext credential storage or request-body logging.
-- One lightweight polling worker with SQLite leases, persisted due dates, jitter, finite retries and backoff. No Redis or browser dependency.
+- One lightweight worker process with two concurrent, isolated SLCM checks and independent push delivery. SQLite leases, persisted due dates, jitter, finite retries and backoff; no Redis or browser dependency. Each portal session has a 120-second deadline, below its 180-second worker lease.
 - Validated snapshots, numeric mark comparisons, course/assessment identity, independent semester baselines, change history, grade and official-SGPA change detection. Missing or partial results preserve the last snapshot.
 - Transactional event/outbox writes; web push with a service worker, lock-screen messages without marks, delivery retries, and expired-subscription cleanup.
 - Administrator-only normal/result-period intervals, expiring result mode and global pause. Admin provisioning requires server-terminal access.
@@ -45,7 +45,7 @@ cd frontend
 npm run dev
 ```
 
-Open http://localhost:3000 and create an app account. Set `PORTAL_ENABLED=true` and configure `ENCRYPTION_KEY` in both API and worker environments to enable live connection. The Windows local launcher does this automatically. The dashboard refreshes every ten seconds; result checks and notification delivery run on the server even with all browser tabs closed. The first snapshot sends no notification.
+Open http://localhost:3000 and create an app account. Set `PORTAL_ENABLED=true` and configure `ENCRYPTION_KEY` in both API and worker environments to enable live connection. The Windows local launcher does this automatically. Visible dashboards refresh every 60–75 seconds after the previous request finishes; hidden tabs pause, then resume with a short random delay. Manual refresh remains available. Result checks and notification delivery run on the server even with all browser tabs closed. The first snapshot sends no notification.
 
 The defaults work for the demo without keys. To configure encryption and push, copy `backend/.env.example` to `backend/.env`, generate keys with `cd backend && ../.venv/bin/python -m app.keys`, and place them in that ignored file. Keep the encryption key stable and back it up securely; changing it makes saved portal credentials unreadable. Both backend processes automatically load this ignored `.env` file. Existing process environment settings take precedence. Production systemd also loads it explicitly. Never paste secrets into source, Git, shell arguments, or screenshots.
 
@@ -129,6 +129,6 @@ The authenticated login and complete marks, grades, and official GPA fetch passe
 
 Run `python scripts/run_local.py` on Windows to install dependencies, create a private local encryption key, and start the live API, worker, and frontend. For manual or VPS deployment, configure `ENCRYPTION_KEY` and `PORTAL_ENABLED=true` for both API and worker. Use `backend/verify_slcm.py` for a private interactive check if the portal changes.
 
-External web-push delivery and production VPS deployment have not been verified. Configure VAPID keys and test delivery with the site closed before relying on push alerts.
+Production VPS deployment and synthetic external web-push delivery were verified on 14 November 2026. Live portal monitoring at large account counts and mass push delivery have not been load-tested.
 
 No live portal credential from the conversation is included in this project.

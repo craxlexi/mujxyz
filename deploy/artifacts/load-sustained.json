@@ -1,0 +1,16 @@
+{
+  "origin": "https://mujheky.lyaxsh.com",
+  "target_rps": 25,
+  "seconds": 60,
+  "requests": 1500,
+  "achieved_rps": 25.0,
+  "p50_ms": 116,
+  "p95_ms": 349,
+  "p99_ms": 5011,
+  "max_ms": 5016,
+  "errors": 24,
+  "statuses": {
+    "200": 1476,
+    "ReadTimeout": 24
+  }
+}

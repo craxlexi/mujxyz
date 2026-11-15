@@ -179,7 +179,7 @@ def connect(body: ConnectInput, request: Request, user=Depends(current_user)):
         # An incomplete reconnect must preserve the original credentials too.
         with db() as conn:
             conn.execute('BEGIN IMMEDIATE')
-            conn.execute('INSERT INTO accounts(user_id,credentials,semester,next_check) VALUES(?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET credentials=excluded.credentials,semester=excluded.semester,next_check=excluded.next_check,paused=0', (user['id'], encrypted, body.semester, time.time()))
+            conn.execute('INSERT INTO accounts(user_id,credentials,semester,next_check) VALUES(?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET credentials=excluded.credentials,semester=excluded.semester,next_check=excluded.next_check,paused=0,lease_until=0', (user['id'], encrypted, body.semester, time.time()))
             save_snapshot(user['id'], body.semester, snapshot, connection=conn)
     except PortalAuthenticationError as exc:
         raise HTTPException(422, str(exc)) from None
@@ -249,10 +249,36 @@ def subscribe(body: PushInput, user=Depends(current_user)):
         raise HTTPException(422, 'Unsupported push service endpoint')
     payload = json.dumps(body.model_dump(), sort_keys=True)
     with db() as conn:
+        conn.execute('BEGIN IMMEDIATE')
+        matches = [row['id'] for row in conn.execute('SELECT id,payload FROM subscriptions WHERE user_id=?', (user['id'],)).fetchall()
+                   if json.loads(row['payload']).get('endpoint') == body.endpoint]
+        if matches:
+            for duplicate in matches[1:]:
+                conn.execute('DELETE FROM subscriptions WHERE id=?', (duplicate,))
+            conn.execute('UPDATE subscriptions SET payload=? WHERE id=?', (payload, matches[0]))
+            return {'ok': True}
         count = conn.execute('SELECT count(*) FROM subscriptions WHERE user_id=?', (user['id'],)).fetchone()[0]
         if count >= 10:
             raise HTTPException(409, 'Device limit reached; disable notifications before re-enabling')
         conn.execute('INSERT OR IGNORE INTO subscriptions VALUES(?,?,?)', (uuid.uuid4().hex, user['id'], payload))
+    return {'ok': True}
+
+class PushEndpoint(BaseModel):
+    endpoint: str = Field(min_length=1, max_length=2048)
+
+@app.post('/api/push/device')
+def push_device_status(body: PushEndpoint, user=Depends(current_user)):
+    with db() as conn:
+        rows = conn.execute('SELECT payload FROM subscriptions WHERE user_id=?', (user['id'],)).fetchall()
+    return {'subscribed': any(json.loads(row['payload']).get('endpoint') == body.endpoint for row in rows)}
+
+@app.delete('/api/push/device')
+def disable_push_device(body: PushEndpoint, user=Depends(current_user)):
+    with db() as conn:
+        rows = conn.execute('SELECT id,payload FROM subscriptions WHERE user_id=?', (user['id'],)).fetchall()
+        for row in rows:
+            if json.loads(row['payload']).get('endpoint') == body.endpoint:
+                conn.execute('DELETE FROM subscriptions WHERE id=? AND user_id=?', (row['id'], user['id']))
     return {'ok': True}
 
 @app.delete('/api/push/subscribe')

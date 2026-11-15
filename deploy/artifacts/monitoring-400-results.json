@@ -1,0 +1,231 @@
+{
+  "kind": "synthetic-worker-test-not-live-SLCM",
+  "accounts": 400,
+  "assumed_fetch_latency_seconds": 1,
+  "poll_concurrency": 2,
+  "first_pass_seconds": 210.05,
+  "all_snapshots_seconds": 230.06,
+  "total_seconds": 290.08,
+  "portal_attempts": 420,
+  "portal_failures_injected": 20,
+  "portal_retries_forced_due": 20,
+  "events": 400,
+  "push_attempts": 408,
+  "push_failures_retried_naturally": 8,
+  "delivered": 400,
+  "overlapping_same_account_checks": 0,
+  "peak_rss_mib": 59.7,
+  "all_assertions_passed": true,
+  "progress": [
+    {
+      "elapsed_seconds": 0.0,
+      "successes": 0,
+      "failed_waiting": 0,
+      "leased": 0,
+      "delivered": 0
+    },
+    {
+      "elapsed_seconds": 10.0,
+      "successes": 17,
+      "failed_waiting": 1,
+      "leased": 2,
+      "delivered": 15
+    },
+    {
+      "elapsed_seconds": 20.0,
+      "successes": 36,
+      "failed_waiting": 2,
+      "leased": 2,
+      "delivered": 34
+    },
+    {
+      "elapsed_seconds": 30.0,
+      "successes": 55,
+      "failed_waiting": 3,
+      "leased": 2,
+      "delivered": 52
+    },
+    {
+      "elapsed_seconds": 40.0,
+      "successes": 74,
+      "failed_waiting": 4,
+      "leased": 2,
+      "delivered": 71
+    },
+    {
+      "elapsed_seconds": 50.0,
+      "successes": 93,
+      "failed_waiting": 5,
+      "leased": 2,
+      "delivered": 88
+    },
+    {
+      "elapsed_seconds": 60.0,
+      "successes": 112,
+      "failed_waiting": 6,
+      "leased": 2,
+      "delivered": 107
+    },
+    {
+      "elapsed_seconds": 70.0,
+      "successes": 129,
+      "failed_waiting": 7,
+      "leased": 2,
+      "delivered": 128
+    },
+    {
+      "elapsed_seconds": 80.0,
+      "successes": 148,
+      "failed_waiting": 8,
+      "leased": 2,
+      "delivered": 145
+    },
+    {
+      "elapsed_seconds": 90.0,
+      "successes": 167,
+      "failed_waiting": 9,
+      "leased": 2,
+      "delivered": 163
+    },
+    {
+      "elapsed_seconds": 100.0,
+      "successes": 186,
+      "failed_waiting": 10,
+      "leased": 2,
+      "delivered": 183
+    },
+    {
+      "elapsed_seconds": 110.0,
+      "successes": 205,
+      "failed_waiting": 11,
+      "leased": 2,
+      "delivered": 202
+    },
+    {
+      "elapsed_seconds": 120.0,
+      "successes": 224,
+      "failed_waiting": 12,
+      "leased": 2,
+      "delivered": 219
+    },
+    {
+      "elapsed_seconds": 130.0,
+      "successes": 243,
+      "failed_waiting": 13,
+      "leased": 2,
+      "delivered": 237
+    },
+    {
+      "elapsed_seconds": 140.0,
+      "successes": 260,
+      "failed_waiting": 14,
+      "leased": 2,
+      "delivered": 257
+    },
+    {
+      "elapsed_seconds": 150.0,
+      "successes": 279,
+      "failed_waiting": 15,
+      "leased": 2,
+      "delivered": 278
+    },
+    {
+      "elapsed_seconds": 160.0,
+      "successes": 298,
+      "failed_waiting": 16,
+      "leased": 2,
+      "delivered": 293
+    },
+    {
+      "elapsed_seconds": 170.0,
+      "successes": 317,
+      "failed_waiting": 17,
+      "leased": 2,
+      "delivered": 312
+    },
+    {
+      "elapsed_seconds": 180.0,
+      "successes": 336,
+      "failed_waiting": 18,
+      "leased": 2,
+      "delivered": 332
+    },
+    {
+      "elapsed_seconds": 190.0,
+      "successes": 355,
+      "failed_waiting": 19,
+      "leased": 2,
+      "delivered": 352
+    },
+    {
+      "elapsed_seconds": 200.0,
+      "successes": 373,
+      "failed_waiting": 20,
+      "leased": 2,
+      "delivered": 369
+    },
+    {
+      "elapsed_seconds": 210.1,
+      "successes": 380,
+      "failed_waiting": 20,
+      "leased": 0,
+      "delivered": 379
+    },
+    {
+      "elapsed_seconds": 220.1,
+      "successes": 396,
+      "failed_waiting": 4,
+      "leased": 2,
+      "delivered": 390
+    },
+    {
+      "elapsed_seconds": 230.1,
+      "successes": 400,
+      "failed_waiting": 0,
+      "leased": 0,
+      "delivered": 395
+    },
+    {
+      "elapsed_seconds": 240.1,
+      "successes": 400,
+      "failed_waiting": 0,
+      "leased": 0,
+      "delivered": 395
+    },
+    {
+      "elapsed_seconds": 250.1,
+      "successes": 400,
+      "failed_waiting": 0,
+      "leased": 0,
+      "delivered": 396
+    },
+    {
+      "elapsed_seconds": 260.1,
+      "successes": 400,
+      "failed_waiting": 0,
+      "leased": 0,
+      "delivered": 396
+    },
+    {
+      "elapsed_seconds": 270.1,
+      "successes": 400,
+      "failed_waiting": 0,
+      "leased": 0,
+      "delivered": 396
+    },
+    {
+      "elapsed_seconds": 280.1,
+      "successes": 400,
+      "failed_waiting": 0,
+      "leased": 0,
+      "delivered": 399
+    },
+    {
+      "elapsed_seconds": 290.1,
+      "successes": 400,
+      "failed_waiting": 0,
+      "leased": 0,
+      "delivered": 400
+    }
+  ]
+}
